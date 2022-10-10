@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Text, View, StyleSheet, Button, SafeAreaView, ScrollView, Alert } from 'react-native';
+import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, ScrollView, Alert } from 'react-native';
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
@@ -10,13 +10,96 @@ const Stack = createStackNavigator();
 const MyStack = () => {
   return (
     <Stack.Navigator>
-      <Stack.Screen name="Home" component={Home} />
+      <Stack.Screen name="HomeScreenStack" component={ HomeScreenStack }/>
+      <Stack.Screen name="DispatchScreenStack" component={ DispatchScreenStack }/>
+      <Stack.Screen name="OrderVerification" component={ OrderVerification } />
       <Stack.Screen name="Task" component={Task} />
     </Stack.Navigator>
   )
 }
 
-const Home = ({ navigation }) => {
+const HomeScreenStack = ({ navigation }) => {
+  return (
+    <SafeAreaView style={styles.container}>
+      <View>
+      <Pressable style={styles.button} onPress={() => {navigation.navigate('OrderVerification')}}>
+        <Text style={styles.text}>Verification</Text>
+      </Pressable>
+      <Pressable style={[styles.button, {marginTop: 50}]} onPress={() => {navigation.navigate('DispatchScreenStack')}}>
+        <Text style={styles.text}>Dispatch</Text>
+      </Pressable>
+      </View>
+    </SafeAreaView>
+  )
+}
+
+const DispatchScreenStack = ({ navigation }) => {
+  const [hasPermission, setHasPermission] = useState(null);
+  const [scanned, setScanned] = useState(false);
+  const [awbNumber, setawbNumber] = useState(null);
+
+  useEffect(() => {
+    const getBarCodeScannerPermissions = async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    };
+
+    getBarCodeScannerPermissions();
+  }, []);
+
+  const handleBarCodeScanned = ({ type, data }) => {
+    setScanned(true);
+    setawbNumber(data);
+    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+  };
+
+  if (hasPermission === null) {
+    return <Text>Requesting for camera permission</Text>;
+  }
+  if (hasPermission === false) {
+    return <Text>No access to camera</Text>;
+  }
+
+  const dispatchAPIMark = () => {
+    const methods = {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' }
+    }
+    const response = fetch(
+      `https://ops.anveshan.farm/api/v1/items/?awb=${awbNumber}&isDispatch=true`,
+      methods,
+    )
+  }
+
+  if (scanned) {
+    dispatchAPIMark()
+    Alert.alert(
+      `${awbNumber}`,
+      `Successfully Dispatched.`,
+      [
+        {
+          text: 'ok',
+          onPress: () => {
+            setScanned(false)
+          },
+        },
+      ],
+      { cancelable: false },
+    )
+  }
+
+  return (
+    <SafeAreaView style={styles.container}>
+        <BarCodeScanner
+          onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
+          style={StyleSheet.absoluteFillObject}
+        />
+        {/* {scanned && <Button title={'Tap to Scan Again'} onPress={() => setScanned(false)} />} */}
+    </SafeAreaView>
+  )
+}
+
+const OrderVerification = ({ navigation }) => {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
 
@@ -173,7 +256,7 @@ const Task = ({ route, navigation }) => {
           headers: { 'Content-Type': 'application/json' }
         }
         const response = fetch(
-          `https://ops.anveshan.farm/api/v1/items/?awb=${awb_number}&?isScanned=true`,
+          `https://ops.anveshan.farm/api/v1/items/?awb=${awb_number}&isScanned=true`,
           methods,
         )
       }
@@ -181,7 +264,7 @@ const Task = ({ route, navigation }) => {
       mark_scanned_after_all_scanned(awb_number);
 
       navigation.navigate(
-        'Home'
+        'OrderVerification'
       )
 
       return;
@@ -262,5 +345,21 @@ const styles = StyleSheet.create({
   barcode_container: {
     height: 300,
     width: '100%'
-  }
+  },
+  button: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 4,
+    elevation: 3,
+    backgroundColor: 'black',
+  },
+  text: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: 'white',
+  },
 });
