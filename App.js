@@ -3,7 +3,8 @@ import { Text, View, StyleSheet, Button, Pressable, SafeAreaView, ScrollView, Al
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import { createStackNavigator } from '@react-navigation/stack';
 import { NavigationContainer } from '@react-navigation/native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+// import Icon from 'react-native-vector-icons/FontAwesome';
+import { Feather } from '@expo/vector-icons';
 
 const Stack = createStackNavigator();
 
@@ -311,7 +312,7 @@ const Task = ({ route, navigation }) => {
               textTransform: 'uppercase'
 
             }}>{el.item}</Text>
-           {el.status === true && <Icon name="check" size={30} color="#059142" /> }
+           {el.status === true && <Feather name="check" size={30} color="#059142" /> }
             {/* <Icon name="remove" size={30} color="#900" /> */}
           </View>
           <View style={{
