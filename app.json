@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "anveshan_qr",
+    "slug": "anveshan_qr",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  },
+  "name": "anveshan_qr"
+}
