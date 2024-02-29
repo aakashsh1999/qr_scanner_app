@@ -206,9 +206,26 @@ const Task = ({ route, navigation }) => {
     return l;
   };
 
-  let items = get_items_json(data.items);
+  // let items = get_items_json(data.items);
+   let item = [ {
+    item:"Test",
+    status:false 
+   }, {
+    item:"Test1",
+    status:false 
+   },
+   {
+    item:"Test",
+    status:false 
+   },{
+    item:"Test2",
+    status:false 
+   },{
+    item:"Test3",
+    status:false 
+   }]
   
-  const [list, setList] = useState(items)
+  const [list, setList] = useState(item)
   const [scanned, setScanned] = useState(false);
 
 
@@ -241,6 +258,7 @@ const Task = ({ route, navigation }) => {
           if(el.item.toLowerCase() === data.toLowerCase()){
             obj.status = true;
           }
+          setTimeout(alert('IsScanned'), 5000)
           return obj
         })
       )
